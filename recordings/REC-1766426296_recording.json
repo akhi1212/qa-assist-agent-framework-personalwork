@@ -1,0 +1,28 @@
+{
+  "recording_id": "REC-1766426296",
+  "url": "https://junction.welocalize.xyz/vendor-portal/",
+  "test_case_title": "Recorded Flow - https://junction.welocalize.xyz/vendor-portal/",
+  "actions": [
+    {
+      "type": "navigate",
+      "url": "https://junction.welocalize.xyz/auth/start",
+      "timestamp": "2025-12-22T23:28:16.324744"
+    },
+    {
+      "type": "navigate",
+      "url": "https://welocalizeapi.okta.com/oauth2/v1/authorize?response_type=code&client_id=0oahysm42k3gpmtLM356&redirect_uri=https%3A%2F%2Fhypnos.welocalize.xyz%2Fv1%2Fauth%2Fopen-id%2Ffinish&scope=openid%20profile%20email&state=eyJyZXR1cm5VcmwiOiJodHRwczovL2p1bmN0aW9uLndlbG9jYWxpemUueHl6L2F1dGgvZmluaXNoIiwiY3NyZlRva2VuIjoiYzczNGUyNjYtNjJmYi00ZmI2LWFlMDYtNWNiODUyMjcyMzI3IiwidGFyZ2V0Ijoib2t0YSIsIm1vZGUiOiJhcHAifQ%3D%3D&nonce=6ec96135-920c-4203-b136-9a28f920bdb4",
+      "timestamp": "2025-12-22T23:28:16.324754"
+    },
+    {
+      "type": "navigate",
+      "url": "https://junction.welocalize.xyz/vendor-portal/dashboard",
+      "timestamp": "2025-12-22T23:28:16.324758"
+    }
+  ],
+  "test_steps": [
+    "Navigate to https://junction.welocalize.xyz/auth/start",
+    "Navigate to https://welocalizeapi.okta.com/oauth2/v1/authorize?response_type=code&client_id=0oahysm42k3gpmtLM356&redirect_uri=https%3A%2F%2Fhypnos.welocalize.xyz%2Fv1%2Fauth%2Fopen-id%2Ffinish&scope=openid%20profile%20email&state=eyJyZXR1cm5VcmwiOiJodHRwczovL2p1bmN0aW9uLndlbG9jYWxpemUueHl6L2F1dGgvZmluaXNoIiwiY3NyZlRva2VuIjoiYzczNGUyNjYtNjJmYi00ZmI2LWFlMDYtNWNiODUyMjcyMzI3IiwidGFyZ2V0Ijoib2t0YSIsIm1vZGUiOiJhcHAifQ%3D%3D&nonce=6ec96135-920c-4203-b136-9a28f920bdb4",
+    "Navigate to https://junction.welocalize.xyz/vendor-portal/dashboard"
+  ],
+  "recorded_date": "2025-12-22T23:28:16.325112"
+}

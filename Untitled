@@ -1,0 +1,157 @@
+import os
+import json
+import re
+import pandas as pd
+import streamlit as st
+from dotenv import load_dotenv
+
+from crewai import Agent, Task, Crew, Process
+
+load_dotenv()
+
+st.set_page_config(page_title="CrewAI Test Case Generator", layout="wide")
+
+# ---------------- Sidebar config ----------------
+PROVIDERS = {
+    "OpenAI": {
+        "env_var": "OPENAI_API_KEY",
+        "models": ["gpt-4o-mini", "gpt-4o"]
+    },
+    "Anthropic": {
+        "env_var": "ANTHROPIC_API_KEY",
+        "models": ["anthropic/claude-3-5-sonnet-latest", "anthropic/claude-3-5-haiku-latest"]
+    },
+    "OpenRouter": {
+        "env_var": "OPENROUTER_API_KEY",
+        "models": ["openrouter/openai/gpt-4o-mini", "openrouter/anthropic/claude-3.5-sonnet"]
+    }
+}
+
+def set_key(provider: str, key: str):
+    if key:
+        os.environ[PROVIDERS[provider]["env_var"]] = key
+
+def parse_json_array(text: str):
+    # Try to extract a JSON array from mixed output
+    m = re.search(r"(\[\s*\{.*?\}\s*\])", text, re.DOTALL)
+    if m:
+        try:
+            return json.loads(m.group(1))
+        except Exception:
+            pass
+    # Or if output is purely JSON:
+    try:
+        return json.loads(text)
+    except Exception:
+        return None
+
+def generate_cases(feature_text: str, model: str) -> pd.DataFrame:
+    agent = Agent(
+        role="QA Test Case Designer",
+        goal="Generate clear manual test cases with steps and expected results.",
+        backstory="You write concise, high-signal QA steps and expected outcomes.",
+        llm=model,
+        verbose=False
+    )
+
+    task = Task(
+        description=f"""
+Create 6-12 manual test steps for this feature/story.
+Return STRICT JSON ONLY (no markdown, no commentary) in format:
+
+[
+  {{"step": "1. ...", "expected_result": "..."}},
+  ...
+]
+
+Feature/Story:
+{feature_text}
+""",
+        expected_output="JSON array of objects with step and expected_result",
+        agent=agent
+    )
+
+    crew = Crew(
+        agents=[agent],
+        tasks=[task],
+        process=Process.sequential,
+        verbose=False
+    )
+
+    result = crew.kickoff()
+    raw = str(result)
+
+    data = parse_json_array(raw)
+    if not isinstance(data, list) or not data:
+        data = [{"step": "1. Open the application", "expected_result": "Application opens successfully"}]
+
+    df = pd.DataFrame([{
+        "Step": item.get("step", "").strip(),
+        "Expected Result": item.get("expected_result", "").strip()
+    } for item in data])
+
+    if df.empty:
+        df = pd.DataFrame([{"Step": "1. ", "Expected Result": ""}])
+
+    return df
+
+# ---------------- UI ----------------
+with st.sidebar:
+    st.header("Settings")
+
+    provider = st.selectbox("ADD your key to access", list(PROVIDERS.keys()))
+    api_key = st.text_input(f"{provider} API Key", type="password")
+    set_key(provider, api_key)
+
+    model = st.selectbox("Model", PROVIDERS[provider]["models"])
+
+    st.markdown("---")
+    st.subheader("Jira (later - optional)")
+    st.text_input("Jira Key / URL (placeholder)")
+    st.text_input("Jira API Token (placeholder)", type="password")
+
+    st.markdown("---")
+    st.caption("GIF placeholders (add files in assets/)")
+    if os.path.exists("assets/how_to_add_keys.gif"):
+        st.image("assets/how_to_add_keys.gif", use_container_width=True)
+    else:
+        st.write("Add: assets/how_to_add_keys.gif")
+
+    if os.path.exists("assets/how_to_add_jira.gif"):
+        st.image("assets/how_to_add_jira.gif", use_container_width=True)
+    else:
+        st.write("Add: assets/how_to_add_jira.gif")
+
+st.title("Test Case Generator (CrewAI + Streamlit)")
+
+feature_text = st.text_area(
+    "Jira Feature story for which you want test cases to be generated:",
+    height=200,
+    placeholder="Paste story / acceptance criteria here..."
+)
+
+col1, col2 = st.columns([1, 2])
+with col1:
+    generate = st.button("Generate Test Cases", type="primary", use_container_width=True)
+
+with col2:
+    if "df" not in st.session_state:
+        st.session_state.df = pd.DataFrame([{"Step": "1. ", "Expected Result": ""}])
+
+    if generate:
+        provider_env = PROVIDERS[provider]["env_var"]
+        if not (api_key or os.getenv(provider_env)):
+            st.warning(f"Please add your {provider} API key in the sidebar (or set {provider_env} in .env).")
+        elif not feature_text.strip():
+            st.warning("Please paste a feature/story first.")
+        else:
+            with st.spinner("Generating..."):
+                st.session_state.df = generate_cases(feature_text, model)
+
+    st.subheader("Generated test cases (editable)")
+    edited = st.data_editor(
+        st.session_state.df,
+        num_rows="dynamic",
+        use_container_width=True
+    )
+    st.session_state.df = edited

@@ -1,0 +1,28 @@
+{
+  "recording_id": "REC-1766502304",
+  "test_case_id": "TC-01",
+  "ticket_id": "PAN-12776",
+  "test_case_title": "Recorded Flow - https://junction.welocalize.xyz/vendor-portal/",
+  "url": "https://junction.welocalize.xyz/vendor-portal/",
+  "actions": [
+    {
+      "type": "navigate",
+      "url": "https://junction.welocalize.xyz/auth/start",
+      "timestamp": "2025-12-23T20:35:04.002047"
+    },
+    {
+      "type": "navigate",
+      "url": "https://junction.welocalize.xyz/vendor-portal/dashboard",
+      "timestamp": "2025-12-23T20:35:04.002058"
+    }
+  ],
+  "test_steps": [
+    "Navigate to https://junction.welocalize.xyz/auth/start",
+    "Navigate to https://junction.welocalize.xyz/vendor-portal/dashboard"
+  ],
+  "generated_code": {
+    "python": "import { test, expect } from '@playwright/test';\n\ntest('test', async ({ page }) => {\n  await page.goto('https://junction.welocalize.xyz/auth/start');\n  await page.getByRole('button', { name: 'Authenticate' }).click();\n  await page.getByRole('textbox', { name: 'Username' }).press('ControlOrMeta+b');\n  await page.getByRole('textbox', { name: 'Username' }).fill('randomy01@proton.me');\n  await page.getByRole('button', { name: 'Next' }).click();\n  await page.getByRole('textbox', { name: 'Password' }).press('CapsLock');\n  await page.getByRole('textbox', { name: 'Password' }).fill('Localize1');\n  await page.getByRole('button', { name: 'Verify' }).click();\n  await page.goto('https://junction.welocalize.xyz/vendor-portal/dashboard');\n  await page.getByRole('button', { name: 'Profile' }).click();\n  await expect(page.getByRole('textbox', { name: '* Primary contact email ' })).toHaveValue('ete-unique0010@proton.me');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).click();\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).press('ArrowLeft');\n  await page.getByRole('textbox', { name: '* Primary contact email ' }).fill('ete-unique-100Percentage@proton.me');\n  await page.getByRole('button', { name: 'update ' }).click();\n  await expect(page.getByRole('textbox', { name: '* Primary contact email ' })).toHaveValue('ete-unique-100Percentage@proton.me');\n  await page.getByRole('button', { name: 'Options' }).click();\n  await page.getByText('Logout').click();\n});",
+    "javascript": ""
+  },
+  "recorded_date": "2025-12-23T20:35:04.002937"
+}

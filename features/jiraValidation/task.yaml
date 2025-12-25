@@ -1,0 +1,13 @@
+validate_jira_credentials:
+  description: |
+    Validate the Jira credentials provided:
+    - Jira Email: {jira_email}
+    - Jira API Token: (provided)
+    
+    Respond with ONLY one of these messages:
+    - "VALID" if credentials are working
+    - "INVALID" if credentials are not working
+    
+    Keep your response to just that one word.
+  expected_output: "A single word: VALID or INVALID"
+

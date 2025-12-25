@@ -1,0 +1,171 @@
+generate_playwright_code:
+  agent: code_generator
+  description: |
+    You will generate Playwright automation code for a test case.
+
+    Test Case ID: {test_case_id}
+    Test Case Title: {test_case_title}
+    
+    CRITICAL: If a recorded browser flow is provided below, YOU MUST USE IT as the PRIMARY source. 
+    The recorded flow contains the ACTUAL Playwright codegen output with ALL interactions, locators, and navigation.
+    
+    When a recorded flow is provided:
+    1. **READ THE ACTUAL CODEGEN CODE** provided in the "Recorded Browser Flow" section below
+    2. **EXTRACT EVERY SINGLE LOCATOR** from that codegen code - these are the ONLY locators you should use
+    3. **DO NOT** use example locators from these instructions or make up locators - ONLY use what's in the codegen code
+    4. Convert each extracted locator to POM format (class Locators for Python, const locators object for JavaScript)
+    5. Generate code based EXACTLY on the recorded flow sequence
+    6. Include ALL navigation steps (every page.goto() from the recorded flow)
+    7. Include ALL interactions in the order they were recorded
+    8. Create reusable functions for each action (click, fill, navigate, etc.)
+    9. Use the EXACT selectors from codegen - do not modify, improve, or replace them
+    10. The codegen code shows the actual working selectors - extract and use them exactly
+    11. Use the test steps only to supplement or add context if needed
+
+    Recorded Browser Flow (if available):
+    {recorded_flow}
+
+    Test Steps (use ONLY if no recorded flow, or to add additional context):
+    {test_steps}
+
+    Expected Results:
+    {expected_results}
+
+    Requirements:
+    1. Generate code in BOTH Python and JavaScript
+    2. Follow Page Object Model (POM) pattern
+    3. Create reusable locators at the top
+    4. Create reusable functions for common actions
+    5. Follow DRY (Don't Repeat Yourself) principles
+    6. Use best practices for Playwright locators (prefer data-testid, role, text, etc.)
+    7. Include proper error handling and assertions
+    8. Make functions small, focused, and reusable
+
+    Code Format Requirements (CRITICAL):
+    
+    For Python functions, use EXACTLY this format:
+    async def function_name(self) -> None:
+        """
+        Brief description of what the function does.
+        
+        This function [detailed description of the action].
+        """
+        try:
+            logger.info("Descriptive log message about the action")
+            # Wait for element and perform action
+            await self.page.locator("selector").click()
+            # Additional actions if needed
+        except Exception as e:
+            logger.error(f"Error message: {{e}}")
+            raise
+    
+    For JavaScript functions, use EXACTLY this format:
+    async functionName() {{
+        /**
+         * Brief description of what the function does.
+         * 
+         * This function [detailed description of the action].
+         */
+        try {{
+            logger.info("Descriptive log message about the action");
+            // Wait for element and perform action
+            await this.page.locator("selector").click();
+            // Additional actions if needed
+        }} catch (error) {{
+            logger.error(`Error message: ${{error}}`);
+            throw error;
+        }}
+    }}
+
+    IMPORTANT:
+    - All functions MUST be async
+    - All Python functions MUST have type hint -> None
+    - All functions MUST have docstrings (triple quotes for Python, /** */ for JavaScript)
+    - All functions MUST use try-except/try-catch blocks
+    - All functions MUST include logger.info statements
+    - Use self.page for Python, this.page for JavaScript
+    - Function names should be descriptive and use snake_case for Python, camelCase for JavaScript
+    - Include proper error handling with logger.error
+
+    Locator Format Requirements:
+    
+    ⚠️⚠️⚠️ CRITICAL WARNING ⚠️⚠️⚠️
+    DO NOT COPY THE EXAMPLE LOCATORS BELOW. They are FORMAT examples only.
+    You MUST extract locators from the ACTUAL codegen code in the "Recorded Browser Flow" section above.
+    If you copy example locators instead of extracting from codegen, the code will be WRONG.
+    
+    Step-by-step process:
+    1. Scroll up and find the "Recorded Browser Flow" section
+    2. Look at the Python code from codegen (between ```python tags)
+    3. Find EVERY locator call: get_by_role(), get_by_test_id(), locator(), get_by_text(), etc.
+    4. Extract the exact selector/parameters from each call
+    5. Convert to the format below based on the type:
+       - get_by_role('button', name='Click Me') → "role=button[name='Click Me']"
+       - get_by_test_id('submit-btn') → "data-testid=submit-btn"
+       - locator('#username') → "#username"
+       - get_by_text('Login') → "text=Login"
+    
+    For Python locators, use class attribute format (FORMAT EXAMPLE - DO NOT COPY):
+    class Locators:
+        # EXAMPLE: If codegen has: page.get_by_role('button', name='Authenticate')
+        # Then extract: AUTHENTICATE_BUTTON = "role=button[name='Authenticate']"
+        # DO NOT copy this example - extract YOUR actual locators from codegen code above
+        AUTHENTICATE_BUTTON = "role=button[name='Authenticate']"  # ← EXAMPLE ONLY
+        USERNAME_TEXTBOX = "role=textbox[name='Username']"  # ← EXAMPLE ONLY
+        # Extract ALL locators from YOUR codegen code - DO NOT use these examples
+    
+    For JavaScript locators, use object format (FORMAT EXAMPLE - DO NOT COPY):
+    const locators = {{
+        // EXAMPLE: If codegen has: page.getByRole('button', {{ name: 'Authenticate' }})
+        // Then extract: authenticateButton: "role=button[name='Authenticate']"
+        // DO NOT copy this example - extract YOUR actual locators from codegen code above
+        authenticateButton: "role=button[name='Authenticate']",  // ← EXAMPLE ONLY
+        usernameTextbox: "role=textbox[name='Username']",  // ← EXAMPLE ONLY
+        // Extract ALL locators from YOUR codegen code - DO NOT use these examples
+    }};
+    
+    ⚠️ REMINDER: The examples above show FORMAT only. Extract YOUR locators from the codegen code.
+    - DO NOT use example locators from these instructions
+    - DO NOT make up locators
+    - Extract EVERY locator from the actual codegen code provided in the recorded flow
+    - For get_by_role/getByRole calls: extract both role and name, format as "role=button[name='Name']"
+    - For get_by_test_id/getByTestId calls: format as "data-testid=value"
+    - For locator() calls: use the exact selector string from codegen
+    - DO NOT use raw dictionaries like {{'key': 'value'}}. Use proper class/object format.
+
+    Output Format:
+    Generate a JSON object with the following structure:
+
+    {{
+      "locators": {{
+        "python": "Locators in Python format as class attributes (see format above)",
+        "javascript": "Locators in JavaScript format as object (see format above)"
+      }},
+      "reusable_functions": {{
+        "python": "Reusable functions in Python following the exact format above (POM-based, no page class wrapper). Each function must be async def with docstrings, try-except, and logger.",
+        "javascript": "Reusable functions in JavaScript following the exact format above (POM-based, no page class wrapper). Each function must be async with JSDoc, try-catch, and logger."
+      }},
+      "test_functions": {{
+        "python": "Small test-specific reusable functions in Python following the exact format above. Each function must be async def with docstrings, try-except, and logger.",
+        "javascript": "Small test-specific reusable functions in JavaScript following the exact format above. Each function must be async with JSDoc, try-catch, and logger."
+      }},
+      "cursor_prompt": "A prompt for Cursor AI that instructs to copy the reusable functions and locators to the correct page class, follow POM pattern, DRY principles, and reuse existing functions/locators first"
+    }}
+
+    Code Structure Guidelines:
+    - Locators should be formatted as class attributes (Python) or object properties (JavaScript), NOT raw dictionaries
+    - Functions should be self-contained and reusable
+    - Use async/await for both Python and JavaScript
+    - Include proper imports/requires (assume logger is already imported)
+    - Add meaningful docstrings for all functions
+    - Use meaningful function and variable names
+    - Follow the exact format specified above for ALL functions
+    - All code should be production-ready and properly formatted
+  expected_output: |
+    A strictly valid JSON object with:
+    - locators: object with "python" and "javascript" strings
+    - reusable_functions: object with "python" and "javascript" strings
+    - test_functions: object with "python" and "javascript" strings
+    - cursor_prompt: string with instructions for Cursor AI
+  output_file: "generated_code.json"
+

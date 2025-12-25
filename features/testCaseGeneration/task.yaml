@@ -1,0 +1,157 @@
+validate_jira_story:
+  agent: test_case_validator
+  description: |
+    You will be given details for a Jira ticket.
+
+    Jira key: {jira_key}
+    Jira project: {jira_project}
+    Jira summary:
+    {jira_summary}
+
+    Jira description:
+    {jira_description}
+
+    1. Determine whether this ticket is clearly about QA/testing activities.
+       Typical QA/testing tickets include keywords or intent like:
+       - "test", "testing", "test cases", "test plan"
+       - "validate", "validation"
+       - "verify", "verification"
+       - "acceptance criteria", "AC"
+       - "QA", "quality assurance"
+       - "regression", "functional testing", "integration testing"
+
+    2. Assess if there is enough information to design meaningful test cases:
+       - Are there clear requirements or acceptance criteria?
+       - Is the scope of the feature / change understandable?
+       - Are main flows or user actions described?
+
+    Your decision must be one of:
+
+    - "invalid":
+        The ticket is not about QA/testing at all,
+        or it is clearly unrelated to test design.
+
+    - "needs_more_info":
+        It is about QA/testing OR can be tested, but there is
+        not enough detail to safely design good test cases.
+        You must specify what additional information is needed.
+
+    - "ready":
+        It is a QA/testing ticket (or has clear testable behavior),
+        and it has enough detail to proceed with test-case design.
+
+    Respond with a single JSON object with this shape:
+
+    {{
+      "status": "invalid" | "needs_more_info" | "ready",
+      "reason": "<short explanation>",
+      "keywords_detected": ["list", "of", "keywords"],
+      "questions": [
+        "If status is needs_more_info, list specific questions to ask the user."
+      ],
+      "summary": "Concise one-paragraph story summary if status is ready.",
+      "key_requirements": [
+        "List of key behaviors, acceptance criteria, or flows if status is ready."
+      ]
+    }}
+
+    Rules:
+    - If the ticket is clearly NOT about QA/testing, use status "invalid".
+    - If it is testable but unclear or missing story/AC details, use "needs_more_info"
+      and provide targeted questions (e.g., ask for acceptance criteria, main flows).
+    - Only use "ready" if you are confident you can design sensible test cases.
+  expected_output: |
+    A strictly valid JSON object with keys:
+    - status: "invalid" | "needs_more_info" | "ready"
+    - reason: string
+    - keywords_detected: array of strings
+    - questions: array of strings (may be empty)
+    - summary: string (may be empty)
+    - key_requirements: array of strings (may be empty)
+  output_file: "validation_result.json"
+
+generate_test_cases:
+  agent: test_case_generator
+  context: [validate_jira_story]
+  description: |
+    You will generate test cases based on the result of the Jira story validation.
+
+    Validation result (JSON):
+    {validate_jira_story.output}
+
+    Behavior rules:
+
+    1) If validation status is "invalid":
+       - Do NOT generate any test cases.
+       - Return a JSON object:
+         {{
+           "status": "invalid",
+           "notes": "Short explanation why this Jira ticket is not suitable for test-case generation."
+         }}
+
+    2) If validation status is "needs_more_info":
+       - Do NOT generate any test cases yet.
+       - Use the validator's "questions" field to tell the user what additional
+         information is required (e.g., ask for story details, acceptance criteria).
+       - Return a JSON object:
+         {{
+           "status": "needs_more_info",
+           "notes": "Explain what information is missing.",
+           "questions": [
+             "List of specific questions to ask the user to complete the story."
+           ]
+         }}
+
+    3) Only if validation status is "ready":
+       - Use the provided "summary" and "key_requirements" to design test cases.
+       - Assume the user will paste any missing details if needed.
+
+       Generate 6–15 manual test cases that cover:
+       - Happy-path / positive scenarios
+       - Negative scenarios (invalid input, missing data, forbidden actions, etc.)
+       - Boundary / edge cases where relevant
+       - Error-handling and validation messages if applicable
+
+       For each test case, create:
+       - A short ID like "TC-01", "TC-02", ...
+       - A short title
+       - A list of ordered steps (strings)
+       - A list of expected results aligned with the steps
+
+       Output a JSON object:
+
+       {{
+         "status": "ready",
+         "notes": "Short note about coverage (e.g., key flows covered).",
+         "test_cases": [
+           {{
+             "id": "TC-01",
+             "title": "Short scenario title",
+             "steps": [
+               "1. ...",
+               "2. ..."
+             ],
+             "expected_results": [
+               "Expected outcome for step 1",
+               "Expected outcome for step 2"
+             ]
+           }},
+           ...
+         ]
+       }}
+
+    General rules:
+    - Output JSON ONLY. No markdown, no code fences, no plain-text commentary.
+    - Test steps and expected results must be clear enough for a manual tester.
+    - Keep titles and wording consistent and professional.
+  expected_output: |
+    A strictly valid JSON object with:
+    - status: "invalid" | "needs_more_info" | "ready"
+    - notes: string
+    - questions: array of strings (only when status="needs_more_info")
+    - test_cases: array of objects (only when status="ready"), each with:
+        - id: string
+        - title: string
+        - steps: array of strings
+        - expected_results: array of strings
+  output_file: "test_cases.json"

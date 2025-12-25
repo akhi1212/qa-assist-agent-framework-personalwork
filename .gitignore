@@ -1,0 +1,10 @@
+.venv
+.env
+__pycache__/
+.streamlit/
+*.pyc
+user_creds.json
+.encryption_key
+chroma_db/
+testcaseGenerated/
+nickname_index.json

@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jira Test Case Generator & Playwright Code Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 60px;
+            max-width: 1200px;
+            width: 100%;
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .slide.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3.5em;
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        h2 {
+            font-size: 2.5em;
+            color: #764ba2;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        h3 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            color: #666;
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 300;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 5px solid #667eea;
+        }
+
+        .feature-card h4 {
+            font-size: 1.5em;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .feature-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-card li {
+            padding: 8px 0;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .feature-card li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .workflow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .workflow-step {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            position: relative;
+            padding-left: 60px;
+        }
+
+        .workflow-step::before {
+            content: counter(step-counter);
+            counter-increment: step-counter;
+            position: absolute;
+            left: 20px;
+            top: 25px;
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .workflow-container {
+            counter-reset: step-counter;
+        }
+
+        .value-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 40px;
+        }
+
+        .value-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .value-card h4 {
+            font-size: 1.8em;
+            margin-bottom: 15px;
+        }
+
+        .value-card .metric {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 15px 0;
+        }
+
+        .benefits-list {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+
+        .benefits-list ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .benefits-list li {
+            padding: 10px;
+            padding-left: 35px;
+            position: relative;
+        }
+
+        .benefits-list li:before {
+            content: "🎯";
+            position: absolute;
+            left: 0;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .slide-indicator {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #667eea;
+            z-index: 1000;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #f6d365 0%, #fda085 100%);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .emoji {
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+<body>
+    <div class="slide-indicator">
+        <span id="slide-number">1</span> / 4
+    </div>
+
+    <!-- Slide 1: Title & Overview -->
+    <div class="slide-container">
+        <div class="slide active">
+            <h1>🚀 Jira Test Case Generator & Playwright Code Generator</h1>
+            <p class="subtitle">Automated QA Testing Made Simple</p>
+            
+            <div style="margin-top: 50px;">
+                <h3 style="text-align: center; color: #764ba2; margin-bottom: 30px;">What is it?</h3>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h4>🎫 Jira Integration</h4>
+                        <p>Generate test cases directly from Jira tickets using AI</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>🎥 Browser Recording</h4>
+                        <p>Record user flows and convert to Playwright code</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>💻 Code Generation</h4>
+                        <p>Generate production-ready POM-based automation code</p>
+                    </div>
+                    <div class="feature-card">
+                        <h4>✨ Best Practices</h4>
+                        <p>Follows DRY principles and industry standards</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 40px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px;">
+                <h3 style="color: white; margin-bottom: 20px;">Key Benefits</h3>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; font-size: 1.1em;">
+                    <div><strong>⚡ Faster</strong><br>90% time reduction</div>
+                    <div><strong>🎯 Accurate</strong><br>AI-powered coverage</div>
+                    <div><strong>🔄 Reusable</strong><br>POM-based code</div>
+                    <div><strong>📝 Documented</strong><br>Auto-generated docs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2: Key Features -->
+    <div class="slide-container">
+        <div class="slide">
+            <h2>✨ Key Features</h2>
+            
+            <div class="features-grid" style="grid-template-columns: 1fr;">
+                <div class="feature-card">
+                    <h4>1. 🎫 Jira Integration</h4>
+                    <ul>
+                        <li>Connect to Jira and fetch ticket details automatically</li>
+                        <li>Generate test cases directly from ticket descriptions</li>
+                        <li>Support for multiple test case formats and structures</li>
+                        <li>Maintain test case history and versioning</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h4>2. 🎥 Browser Flow Recording</h4>
+                    <ul>
+                        <li>Record user interactions in real-time using Playwright</li>
+                        <li>Capture all navigation, clicks, fills, and interactions</li>
+                        <li>Export recorded flows to JSON format</li>
+                        <li>Convert recordings to Playwright code automatically</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h4>3. 🤖 Intelligent Code Generation</h4>
+                    <ul>
+                        <li>Generates both Python and JavaScript Playwright code</li>
+                        <li>Follows Page Object Model (POM) pattern</li>
+                        <li>Creates reusable locators and functions</li>
+                        <li>Includes proper error handling, logging, and documentation</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h4>4. 🏆 Code Quality & Best Practices</h4>
+                    <ul>
+                        <li>DRY (Don't Repeat Yourself) principles</li>
+                        <li>Production-ready code with comprehensive error handling</li>
+                        <li>Well-documented with meaningful function names</li>
+                        <li>Cursor AI integration prompts for easy code integration</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: How It Works -->
+    <div class="slide-container">
+        <div class="slide">
+            <h2>🔄 How It Works</h2>
+            
+            <div class="workflow-container">
+                <div class="workflow-steps">
+                    <div class="workflow-step">
+                        <h4>Step 1: Generate Test Cases</h4>
+                        <ul style="list-style: disc; padding-left: 20px; margin-top: 10px;">
+                            <li>Enter Jira ticket ID</li>
+                            <li>AI analyzes ticket description and requirements</li>
+                            <li>Generates comprehensive test cases with steps and expected results</li>
+                            <li>Test cases saved for future use and reference</li>
+                        </ul>
+                    </div>
+
+                    <div class="workflow-step">
+                        <h4>Step 2: Record Browser Flow (Optional)</h4>
+                        <ul style="list-style: disc; padding-left: 20px; margin-top: 10px;">
+                            <li>Select a test case from the dropdown</li>
+                            <li>Launch browser recording using Playwright codegen</li>
+                            <li>Perform actions in the browser (navigate, click, fill forms)</li>
+                            <li>System captures all interactions and saves to JSON</li>
+                        </ul>
+                    </div>
+
+                    <div class="workflow-step">
+                        <h4>Step 3: Generate Playwright Code</h4>
+                        <ul style="list-style: disc; padding-left: 20px; margin-top: 10px;">
+                            <li>System processes recorded flow or test steps</li>
+                            <li>AI extracts locators from codegen output</li>
+                            <li>Generates POM-based code with reusable components</li>
+                            <li>Code includes locators, functions, and test-specific code</li>
+                        </ul>
+                    </div>
+
+                    <div class="workflow-step">
+                        <h4>Step 4: Use Generated Code</h4>
+                        <ul style="list-style: disc; padding-left: 20px; margin-top: 10px;">
+                            <li>Copy locators to page classes</li>
+                            <li>Integrate reusable functions into test suites</li>
+                            <li>Run automated tests with confidence</li>
+                            <li>Maintain and update code easily with POM pattern</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Value Proposition -->
+    <div class="slide-container">
+        <div class="slide">
+            <h2>💡 Value Proposition</h2>
+            
+            <div class="value-grid">
+                <div class="value-card">
+                    <h4>⏱️ Time Savings</h4>
+                    <div class="metric">90%+</div>
+                    <p><strong>Before:</strong> 2-4 hours per test case<br>
+                    <strong>After:</strong> 5-10 minutes per test case</p>
+                </div>
+
+                <div class="value-card">
+                    <h4>✅ Quality</h4>
+                    <div class="metric">100%</div>
+                    <p>Consistent structure<br>
+                    Best practice patterns<br>
+                    Comprehensive coverage</p>
+                </div>
+
+                <div class="value-card">
+                    <h4>🚀 Speed</h4>
+                    <div class="metric">10x</div>
+                    <p>Faster development<br>
+                    Accelerated delivery<br>
+                    Quick iterations</p>
+                </div>
+            </div>
+
+            <div class="benefits-list">
+                <h3 style="text-align: center; margin-bottom: 20px;">Team Benefits</h3>
+                <ul>
+                    <li>🎯 Faster test development cycles</li>
+                    <li>📚 Knowledge sharing through generated code</li>
+                    <li>🔧 Easy maintenance with POM pattern</li>
+                    <li>🚀 Accelerated delivery timelines</li>
+                    <li>🎓 Learning best practices automatically</li>
+                    <li>🔄 Reusable components across projects</li>
+                </ul>
+            </div>
+
+            <div style="margin-top: 40px; text-align: center; background: #f8f9fa; padding: 30px; border-radius: 15px;">
+                <h3 style="color: #667eea; margin-bottom: 20px;">Next Steps</h3>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-size: 1.2em;">
+                    <div><strong>1. Demo</strong><br>Live demonstration</div>
+                    <div><strong>2. Q&A</strong><br>Questions and answers</div>
+                    <div><strong>3. Adoption</strong><br>Team training and rollout</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Previous</button>
+        <button class="nav-btn" onclick="nextSlide()">Next →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            slides.forEach(slide => slide.classList.remove('active'));
+            
+            if (n >= totalSlides) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = n;
+            }
+            
+            slides[currentSlide].classList.add('active');
+            document.getElementById('slide-number').textContent = currentSlide + 1;
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                previousSlide();
+            }
+        });
+
+        // Initialize
+        showSlide(0);
+    </script>
+</body>
+</html>
+

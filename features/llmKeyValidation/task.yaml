@@ -1,0 +1,11 @@
+validate_api_key:
+  description: |
+    Validate that the {provider} API key is working correctly.
+    
+    You should respond with ONLY one of these exact messages:
+    - "VALID" if the key is working
+    - "INVALID" if the key is not working
+    
+    Keep your response to just that one word.
+  expected_output: "A single word: VALID or INVALID"
+

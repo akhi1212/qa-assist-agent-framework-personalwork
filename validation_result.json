@@ -1,0 +1,13 @@
+{
+  "status": "needs_more_info",
+  "reason": "The ticket lacks detailed information about the specific QA/testing tasks, requirements, or acceptance criteria necessary to design test cases.",
+  "keywords_detected": [],
+  "questions": [
+    "What specific automation tasks are to be performed?",
+    "Are there any acceptance criteria or specific requirements for the automation tasks?",
+    "What are the main flows or user actions that need to be automated?",
+    "Is there a specific feature or functionality that these automation tasks are targeting?"
+  ],
+  "summary": "",
+  "key_requirements": []
+}

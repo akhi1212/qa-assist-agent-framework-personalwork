@@ -69,3 +69,6 @@ Similarly, Jira email and API token are saved to `.env` file after you enter the
 - `.env` file is in `.gitignore` (never committed to git)
 - API keys are never displayed in plain text in the UI
 - Keys are stored locally on your machine only
+
+![clideo_editor_acf94cff12974799835bd50224ca0ccc](https://github.com/user-attachments/assets/3afded40-aa80-4718-a193-3298773e8e5e)
+
